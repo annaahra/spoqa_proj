@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+
+		<!-- Always force latest IE rendering engine (even in intranet) & Chrome Frame
+		Remove this if you use the .htaccess -->
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+
+		<title>spoqa SNS</title>
+		<link type="text/css" rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+		<script src="{{ url_for('static', filename='jquery-1.8.3.min.js') }}"></script>
+		<script src="{{ url_for('static', filename='event.js') }}"></script>
+		<script>
+		function addFriend()
+		{
+			for(var i=0;i<$("input:checked").length;i++)
+			{
+				alert("my ID : {{ session.email }}, friend ID : "+$(document.getElementById("sft_"+i))[i].value);
+			}
+			
+			$('#searchFriendTable').hide();
+			init_searchTable();
+			get_friendTable();
+		}
+
+		</script>
+	</head>
+
+	<body>
+		{% block body %}
+		<div id="container">
+		<div id="top">
+			{% if session.logged_in %}
+			<div id="loginOK_area">
+				<p>Logined ID is {{ session.email }}</p>
+				<input type="button" id="logout" name="logout" value="Logout" />
+			</div>
+			{% else %}
+			<div id="join_area" style="display:none;">
+				<form action="{{ url_for('join') }}" method="post">
+					ID(E-MAIL)
+					<input type="text" id="ja_id" name="email" size="15"/>
+					NAME
+					<input type="text" id="ja_name" name="name" size="15"/>
+					PASSWORD
+					<input type="password" id="ja_pw" name="password" size="15"/>
+					<input type="password" id="ja_pw1" name="password1" size="15"/>
+					<br/>
+					<input type="submit" id="join" name="join" value="Join"/>
+					<input type="button" id="cancel" name="cancel" value="Cancel"/>
+					<br/>
+				</form>
+			</div>
+			
+			<div id="login_area">
+				<form action="{{ url_for('login') }}" method="post">
+					ID(E-MAIL)
+					<input type="text" id="la_id" name="email" size="15"/>
+					PWSSWORD
+					<input type="password" id="la_pw" name="password" size="15"/>
+					<input type="submit" id="login" name="login" value="Login"/>
+					<input type="button" id="show_join" name="show_join" value="Join"/>
+				</form>
+			</div>
+			{% endif %}
+			{% for message in get_flashed_messages() %}
+			<div class=flash>{{ message }}</div>
+			{% endfor %}
+			{% if error %}
+			<div class=error>{{ error }}</div>
+			{% endif %}
+		</div>
+		
+		{% if session.logged_in %}
+		<div id="left">
+			<table id="currentFriendTable">
+				<tbody>
+					<tr>
+						<th><p>친구 목록</p></th>
+					</tr>
+					{% for friend in session.friend_list %}
+					<tr id="cft_row">
+						<td><p id="cft_list">{{ friend[0] }}</p></td>
+					</tr>
+					{% endfor %}
+					
+				</tbody>
+			</table>
+			<input id="searchFriend" type="text" name="searchFriend" size="25" value="search Friends here"/>
+			<table id="searchFriendTable">
+				<tbody>
+					<form action="{{ url_for('addFriend') }}", method="post">
+					<tr>
+						<th>
+							<p>검색 결과
+							<input type="submit" id="addFriend" name="addFriend" value="add"/>
+							</p>
+						</th>
+					</tr>
+					{% for user in session.user_list %}
+					<tr id="sft_row{{ session.user_list.index(user) }}">
+						<td>
+							<p id="sft_{{ session.user_list.index(user) }}">
+							<input type="checkbox" name="user" value="{{ user.email }}"/>
+							{{ user.email }}
+							</p>
+						</td>
+					</tr>
+					{% endfor %}
+					</form>
+				</tbody>
+			</table>
+			
+		</div>
+		<div id="right">
+			<form action="{{ url_for('post') }}" method="post">
+				<input type="text" id="post" name="post" size="60" value="post Somethings here" style="height:50px;"/>
+				<input type="submit" id="submitPost" name="submitPost" value="Submit"/>
+				<input type="button" id="getPost" name="getPost" value="Refresh"/>
+			</form>
+
+			<table id="postTable">
+				<colgroup>
+					<col style="width:100px;" />
+					<col />
+				</colgroup>
+				<tbody>
+					{% for post in session.post_list %}
+					<tr>
+						<td><p>{{ post.email }}</p></td>
+						<td><p>{{ post.content }}</p></td>
+					</tr>
+					{% endfor %}
+					
+				</tbody>
+			</table>
+		</div>	
+		{% endif %}
+		</div>
+		{% endblock %}
+	</body>
+</html>
